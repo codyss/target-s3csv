@@ -19,8 +19,6 @@ import singer
 import boto3
 import tempfile
 
-
-
 from collections import defaultdict, MutableMapping
 
 s3 = boto3.resource('s3')
@@ -35,6 +33,8 @@ REQUIRED_CONFIG_KEYS = [
     'path',
     'delimiter',
     'quotechar',
+    'integration',
+    'partition_streams',
 ]
 
 
@@ -234,7 +234,8 @@ def process_record(message, schemas, config, state, validators, records, current
     flat_record = parse_record(message, schemas, validators)
 
     if message.stream in config['partition_streams']:
-        record_date = ts_to_date(message.record.get(config['time_key']))
+        record_date = ts_to_date(message.record.get(
+            config['partition_streams'][message.stream]))
 
         current_day = record_date if not current_day else current_day
 
