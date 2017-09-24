@@ -152,7 +152,7 @@ def create_partitions(partition_date, should_partition=False):
 
 def write_to_s3(stream, file_path, config, partition_date):
     partitions = create_partitions(partition_date,
-                                   stream in config['partitions'])
+                                   stream in config['partition_streams'])
 
     key_name = '{path}/{integration}/{stream}/{partitions}/{name}'.format(
         path=config['path'],
@@ -243,9 +243,9 @@ def process_record(message, schemas, config, state, validators, records, current
                 records, config, state, current_day, 'NEW_DAY')
             current_day = record_date
 
-        records[message.stream].append(flat_record)
+    records[message.stream].append(flat_record)
 
-    return records[message.stream], current_day
+    return records, current_day
 
 
 def persist_lines(config, lines):
