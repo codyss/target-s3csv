@@ -62,17 +62,14 @@ def ts_to_dt(ts):
 
 def write_last_state(states):
     logger.info(
-        'Persisted batch of {} records to Stitch'.format(len(states)))
+        'Persisted batch of {} records to S3'.format(len(states)))
     last_state = None
     for state in reversed(states):
         if state is not None:
             last_state = state
             break
     if last_state:
-        line = json.dumps(state)
-        logger.debug('Emitting state {}'.format(line))
-        sys.stdout.write("{}\n".format(line))
-        sys.stdout.flush()
+        emit_state(last_state)
 
 
 def emit_state(state):
@@ -101,6 +98,7 @@ def load_json(record):
     except json.decoder.JSONDecodeError:
         logger.error("Unable to parse:\n{}".format(record))
         raise
+
 
 def process_state(message):
     logger.debug('Setting state to {}'.format(message.value))
@@ -215,7 +213,8 @@ def save_records(records, config, state, day_to_save, reason):
                        config,
                        day_to_save)
 
-        emit_state(state)
+        if state:
+            emit_state(state)
 
     return defaultdict(list), state
 
@@ -252,7 +251,7 @@ def process_record(message, schemas, config, state, validators, records, current
 
 
 def persist_lines(config, lines):
-    state = {'bookmarks': {}}
+    state = None
     schemas = {}
     key_properties = {}
     validators = {}
