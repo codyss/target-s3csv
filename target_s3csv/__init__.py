@@ -74,6 +74,7 @@ def write_last_state(states):
         sys.stdout.write("{}\n".format(line))
         sys.stdout.flush()
 
+
 def emit_state(state):
     if state is not None:
         line = json.dumps(state)
@@ -103,6 +104,7 @@ def load_json(record):
 
 def process_state(message):
     logger.debug('Setting state to {}'.format(message.value))
+    emit_state(message.value)
     return message.value
 
 
